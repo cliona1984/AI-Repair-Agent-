@@ -8,7 +8,7 @@
     <meta http-equiv="Expires" content="0">
     <title>🚀 AI Repair Dashboard</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="embedded_dashboard_data.js"></script>
+    <script src="embedded_dashboard_data.js?v=1"></script>
     <style>
         * {
             margin: 0;
@@ -621,6 +621,8 @@
             
             // Force use of room_mn_materials only
             materials = dashboardData.room_mn_materials || [];
+            
+            console.log('populateMaterialTable called, materials count:', materials.length);
 
             if (!materials || materials.length === 0) {
                 tbody.innerHTML = '<tr><td colspan="10" style="text-align: center; color: #a0a0a0;">No materials available</td></tr>';
@@ -634,12 +636,15 @@
             window.allMaterials = materials;
             
             // Get search value
-            const searchValue = document.getElementById('dpn-search').value.toLowerCase();
+            const searchValue = (document.getElementById('dpn-search').value || '').toLowerCase();
+            console.log('Search value:', searchValue);
             
-            // Filter materials based on search
-            const filteredMaterials = materials.filter(m => 
-                m.dpn.toLowerCase().includes(searchValue)
-            );
+            // Filter materials based on search (only if search value is not empty)
+            const filteredMaterials = searchValue 
+                ? materials.filter(m => m.dpn.toLowerCase().includes(searchValue))
+                : materials;
+            
+            console.log('Filtered materials count:', filteredMaterials.length);
 
             // Display filtered materials with all fields
             tbody.innerHTML = filteredMaterials.map(m => {
@@ -848,6 +853,10 @@
             console.log('DOM Content Loaded');
             console.log('dashboardData exists:', typeof dashboardData !== 'undefined');
             console.log('dashboardData:', dashboardData);
+            console.log('room_mn_materials count:', dashboardData?.room_mn_materials?.length || 0);
+            
+            // Clear search box on load
+            document.getElementById('dpn-search').value = '';
             
             const savedEmail = localStorage.getItem('emailAlias');
             if (savedEmail) {
