@@ -234,6 +234,7 @@
         <div class="tabs">
             <div class="tab active" onclick="switchTab('material')">📦 Materials</div>
             <div class="tab" onclick="switchTab('q2')">🔮 Q2 FY27 Capacity</div>
+            <div class="tab" onclick="switchTab('q3')">🎯 Q3 Projected</div>
             <div class="tab" onclick="switchTab('q1')">📊 Q1 FY27 Historical</div>
         </div>
         
@@ -282,14 +283,15 @@
                                 <th>Room</th>
                                 <th>On-Hand</th>
                                 <th>Q1 Used</th>
-                                <th>Q2 Projected</th>
+                                <th>Q2 Used</th>
+                                <th>Q3 Projected</th>
                                 <th>Lead Time (wks)</th>
                                 <th>Status</th>
                                 <th>Days Aged</th>
                             </tr>
                         </thead>
                         <tbody id="material-table-body">
-                            <tr><td colspan="9" style="text-align: center; color: #a0a0a0;">Loading data...</td></tr>
+                            <tr><td colspan="10" style="text-align: center; color: #a0a0a0;">Loading data...</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -353,6 +355,48 @@
                 <div class="insight-box">
                     <h4>💡 AI Capacity Analysis</h4>
                     <p>Q2 requires 21 Gaines racks (370 sleds) and 31 non-Gaines racks (304 servers). Current capacity shows significant gap: need 11 additional Gaines racks and 23 additional non-Gaines racks. Based on Q1 5% defective rate, additional repair capacity of ~34 units required. Week-by-week coverage model shows critical shortages in multiple projects.</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Q3 Tab -->
+        <div id="q3-tab" class="tab-content">
+            <div class="card">
+                <h2>🎯 Q3 Projected Outlook</h2>
+                <div class="kpi-grid">
+                    <div class="kpi-card">
+                        <div class="kpi-value" id="q3-customers">0</div>
+                        <div class="kpi-label">Total Customers</div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-value" id="q3-august">0</div>
+                        <div class="kpi-label">August Quantity</div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-value" id="q3-total">0</div>
+                        <div class="kpi-label">Total Q3 Quantity</div>
+                    </div>
+                </div>
+                <div style="margin-top: 30px; max-height: 400px; overflow-y: auto;">
+                    <table class="comparison-table">
+                        <thead>
+                            <tr>
+                                <th>Customer</th>
+                                <th>Status</th>
+                                <th>Product L1</th>
+                                <th>Product L2</th>
+                                <th>August Qty</th>
+                                <th>Total Q3</th>
+                            </tr>
+                        </thead>
+                        <tbody id="q3-table-body">
+                            <tr><td colspan="6" style="text-align: center; color: #a0a0a0;">Loading Q3 data...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="insight-box">
+                    <h4>💡 Q3 Projection Insights</h4>
+                    <p>Q3 shows continued growth with 8 customers projected. August represents 60% of total Q3 volume, indicating strong early-quarter demand. Key customers include XTX Finland, Humain AI, and Quadrature driving the majority of volume.</p>
                 </div>
             </div>
         </div>
@@ -569,6 +613,7 @@
             
             populateMaterialTable();
             populateCapacityTable();
+            populateQ3Table();
         }
 
         function populateMaterialTable(materials) {
@@ -578,7 +623,7 @@
             materials = dashboardData.room_mn_materials || [];
 
             if (!materials || materials.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="9" style="text-align: center; color: #a0a0a0;">No materials available</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="10" style="text-align: center; color: #a0a0a0;">No materials available</td></tr>';
                 return;
             }
 
@@ -599,7 +644,8 @@
             // Display filtered materials with all fields
             tbody.innerHTML = filteredMaterials.map(m => {
                 const q1Used = m.q1_consumption || 0;
-                const q2Projected = m.q2_projected || 0;
+                const q2Used = m.q2_consumption || 0;
+                const q3Projected = m.q3_projected || 0;
                 const leadTime = m.lead_time_weeks || 7;
                 const status = m.status || 'unknown';
                 const agingCategory = m.aging_category || 'Unknown';
@@ -613,13 +659,45 @@
                     <td>M&N</td>
                     <td>${m.balance.toLocaleString()}</td>
                     <td>${q1Used.toLocaleString()}</td>
-                    <td>${q2Projected.toLocaleString()}</td>
+                    <td>${q2Used.toLocaleString()}</td>
+                    <td>${q3Projected.toLocaleString()}</td>
                     <td>${leadTime}</td>
                     <td><span class="status-badge status-${status}">${status.toUpperCase()}</span></td>
                     <td style="color: ${m.days_aged > 90 ? '#ff6b6b' : m.days_aged > 60 ? '#ffc107' : '#00ff88'}; font-weight: bold;">${m.days_aged} (${agingCategory})</span></td>
                 </tr>
             `;
             }).join('');
+        }
+
+        function populateQ3Table() {
+            const q3Data = dashboardData.q3_projected || {};
+            
+            // Populate KPI cards
+            document.getElementById('q3-customers').textContent = q3Data.total_customers || 0;
+            document.getElementById('q3-august').textContent = q3Data.total_august_qty || 0;
+            document.getElementById('q3-total').textContent = q3Data.total_q3_qty || 0;
+            
+            // Populate Q3 table
+            const q3TableBody = document.getElementById('q3-table-body');
+            const customerBreakdown = q3Data.customer_breakdown || [];
+            
+            if (customerBreakdown.length > 0) {
+                q3TableBody.innerHTML = customerBreakdown.map(c => {
+                    const statusColor = c.status === 'P1' ? '#ff6b6b' : c.status === 'P2' ? '#ffc107' : '#00ff88';
+                    return `
+                    <tr>
+                        <td>${c.customer}</td>
+                        <td><span class="status-badge" style="background: rgba(255, 255, 255, 0.1); color: ${statusColor}; border: 1px solid ${statusColor};">${c.status}</span></td>
+                        <td>${c.product_l1}</td>
+                        <td>${c.product_l2}</td>
+                        <td style="color: #00ff88; font-weight: bold;">${c.august_qty}</td>
+                        <td style="color: #00d9ff; font-weight: bold;">${c.total_q3}</td>
+                    </tr>
+                `;
+                }).join('');
+            } else {
+                q3TableBody.innerHTML = '<tr><td colspan="6" style="text-align: center; color: #a0a0a0;">No Q3 data available</td></tr>';
+            }
         }
 
         function filterMaterials() {
