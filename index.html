@@ -8,7 +8,7 @@
     <meta http-equiv="Expires" content="0">
     <title>🚀 AI Repair Dashboard</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="embedded_dashboard_data.js?v=6"></script>
+    <script src="embedded_dashboard_data.js?v=7"></script>
     <style>
         * {
             margin: 0;
@@ -282,8 +282,7 @@
                                 <th>Description</th>
                                 <th>Room</th>
                                 <th>On-Hand</th>
-                                <th>Q1 Used</th>
-                                <th>Q2 Used</th>
+                                <th>Consumed since February 2026</th>
                                 <th>Q3 Projected</th>
                                 <th>Lead Time (wks)</th>
                                 <th>Status</th>
@@ -291,7 +290,7 @@
                             </tr>
                         </thead>
                         <tbody id="material-table-body">
-                            <tr><td colspan="10" style="text-align: center; color: #a0a0a0;">Loading data...</td></tr>
+                            <tr><td colspan="9" style="text-align: center; color: #a0a0a0;">Loading data...</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -648,8 +647,7 @@
 
             // Display filtered materials with all fields
             tbody.innerHTML = filteredMaterials.map(m => {
-                const q1Used = m.q1_consumption || 0;
-                const q2Used = m.q2_consumption || 0;
+                const consumedSinceFeb = m.q1_consumption || 0;
                 const q3Projected = m.q3_projected || 0;
                 const leadTime = m.lead_time_weeks || 7;
                 const status = m.status || 'unknown';
@@ -663,8 +661,7 @@
                     <td>${description}</td>
                     <td>M&N</td>
                     <td>${m.balance.toLocaleString()}</td>
-                    <td>${q1Used.toLocaleString()}</td>
-                    <td>${q2Used.toLocaleString()}</td>
+                    <td>${consumedSinceFeb.toLocaleString()}</td>
                     <td>${q3Projected.toLocaleString()}</td>
                     <td>${leadTime}</td>
                     <td><span class="status-badge status-${status}">${status.toUpperCase()}</span></td>
@@ -718,14 +715,14 @@
             }
             
             // Create CSV content
-            const headers = ['DPN', 'Material Description', 'Room', 'On-Hand', 'Q1 Used', 'Q2 Projected', 'Lead Time (weeks)', 'Status', 'Days Aged', 'Aging Category'];
+            const headers = ['DPN', 'Material Description', 'Room', 'On-Hand', 'Consumed since February 2026', 'Q3 Projected', 'Lead Time (weeks)', 'Status', 'Days Aged', 'Aging Category'];
             const rows = materials.map(m => [
                 m.dpn,
                 m.description,
                 'M&N',
                 m.balance,
-                m.q1_consumption || 0,
-                m.q2_projected || 0,
+                m.q1_consumption || 0,  // This represents consumed since February 2026
+                m.q3_projected || 0,
                 m.lead_time_weeks || 7,
                 m.status,
                 m.days_aged,
@@ -824,7 +821,7 @@
                         previous: prevStatus,
                         current: m.status,
                         on_hand: m.balance,
-                        q2_projected: m.q2_projected
+                        q1_consumption: m.q1_consumption
                     });
                 }
             });
@@ -834,7 +831,7 @@
             if (changes.length > 0) {
                 let message = `⚠️ ${changes.length} material(s) transitioned from Green to Amber:\n\n`;
                 changes.forEach(c => {
-                    message += `• ${c.dpn}: ${c.description}\n  On-Hand: ${c.on_hand}, Q2 Projected: ${c.q2_projected}\n\n`;
+                    message += `• ${c.dpn}: ${c.description}\n  On-Hand: ${c.on_hand}, Consumed since Feb: ${c.q1_consumption}\n\n`;
                 });
                 message += `Email: ${email}`;
                 
