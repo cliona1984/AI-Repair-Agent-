@@ -282,16 +282,17 @@
                                 <th>Description</th>
                                 <th>Room</th>
                                 <th>On-Hand</th>
-                                <th>Q1 (Feb 2 - May 3)</th>
-                                <th>Q2 (May 4 - Aug 1)</th>
-                                <th>Q3 to date (Aug 2 - Today)</th>
+                                <th>Q1 Consumed</th>
+                                <th>Q2 Consumed</th>
+                                <th>Q3 Consumed</th>
+                                <th>Q3 Projected</th>
                                 <th>Lead Time (wks)</th>
                                 <th>Status</th>
                                 <th>Days Aged</th>
                             </tr>
                         </thead>
                         <tbody id="material-table-body">
-                            <tr><td colspan="10" style="text-align: center; color: #a0a0a0;">Loading data...</td></tr>
+                            <tr><td colspan="11" style="text-align: center; color: #a0a0a0;">Loading data...</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -651,6 +652,7 @@
                 const q1Consumed = m.q1_consumption || 0;
                 const q2Consumed = m.q2_consumption || 0;
                 const q3Consumed = m.q3_consumption || 0;
+                const q3Projected = m.q3_projected || 0;
                 const leadTime = m.lead_time_weeks || 7;
                 const status = m.status || 'unknown';
                 const agingCategory = m.aging_category || 'Unknown';
@@ -666,6 +668,7 @@
                     <td>${q1Consumed.toLocaleString()}</td>
                     <td>${q2Consumed.toLocaleString()}</td>
                     <td>${q3Consumed.toLocaleString()}</td>
+                    <td>${q3Projected.toLocaleString()}</td>
                     <td>${leadTime}</td>
                     <td><span class="status-badge status-${status}">${status.toUpperCase()}</span></td>
                     <td style="color: ${m.days_aged > 90 ? '#ff6b6b' : m.days_aged > 60 ? '#ffc107' : '#00ff88'}; font-weight: bold;">${m.days_aged} (${agingCategory})</span></td>
@@ -718,7 +721,7 @@
             }
             
             // Create CSV content
-            const headers = ['DPN', 'Material Description', 'Room', 'On-Hand', 'Q1 (Feb 2 - May 3)', 'Q2 (May 4 - Aug 1)', 'Q3 to date (Aug 2 - Today)', 'Lead Time (weeks)', 'Status', 'Days Aged', 'Aging Category'];
+            const headers = ['DPN', 'Material Description', 'Room', 'On-Hand', 'Q1 Consumed', 'Q2 Consumed', 'Q3 Consumed', 'Q3 Projected', 'Lead Time (weeks)', 'Status', 'Days Aged', 'Aging Category'];
             const rows = materials.map(m => [
                 m.dpn,
                 m.description,
@@ -727,6 +730,7 @@
                 m.q1_consumption || 0,  // Q1: Feb 2 - May 3
                 m.q2_consumption || 0,  // Q2: May 4 - Aug 1
                 m.q3_consumption || 0,  // Q3: Aug 2 - Today
+                m.q3_projected || 0,  // Q3 Projected
                 m.lead_time_weeks || 7,
                 m.status,
                 m.days_aged,
